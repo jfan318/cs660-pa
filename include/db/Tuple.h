@@ -11,9 +11,36 @@ namespace db {
      * Tuples have a specified schema specified by a TupleDesc object
      * and contain Field objects with the data for each field.
      */
+    // Customized iterator for Tuple
+    class TupleIterator {
+        size_t index;
+        const std::vector<std::unique_ptr<db::Field>>& fields;
+
+    public:
+        TupleIterator(size_t i, const std::vector<std::unique_ptr<db::Field>>& values)
+                : index(i), fields(values) {}
+
+        bool operator!=(const TupleIterator& other) const {
+            return index != other.index;
+        }
+
+        TupleIterator& operator++() {
+            index++;
+            return *this;
+        }
+
+        const db::Field* operator*() const {
+            return fields[index].get();
+        }
+    };
+
     class Tuple {
         // TODO pa1.1: add private members
-        using iterator = void*; // replace void* with a container iterator or a custom iterator implementation
+        std::vector<std::unique_ptr<Field>> fields;
+        TupleDesc tupleDesc;
+        const RecordId *recordId = nullptr;
+
+        using iterator = TupleIterator; // replace void* with a container iterator or a custom iterator implementation
     public:
         Tuple() = default;
 
