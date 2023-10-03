@@ -14,11 +14,11 @@ namespace db {
     // Customized iterator for Tuple
     class TupleIterator {
         size_t index;
-        const std::vector<std::unique_ptr<db::Field>>& fields;
+        std::vector<const Field*> fields;
 
     public:
-        TupleIterator(size_t i, const std::vector<std::unique_ptr<db::Field>>& values)
-                : index(i), fields(values) {}
+        TupleIterator(size_t i, const std::vector<const Field*> &fields)
+                : index(i), fields(fields) {}
 
         bool operator!=(const TupleIterator& other) const {
             return index != other.index;
@@ -30,13 +30,13 @@ namespace db {
         }
 
         const db::Field* operator*() const {
-            return fields[index].get();
+            return fields[index];
         }
     };
 
     class Tuple {
         // TODO pa1.1: add private members
-        std::vector<std::unique_ptr<Field>> fields;
+        std::vector<const Field*> fields;
         TupleDesc tupleDesc;
         const RecordId *recordId = nullptr;
 

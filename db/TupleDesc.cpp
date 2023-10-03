@@ -57,6 +57,7 @@ int TupleDesc::fieldNameToIndex(const std::string &fieldName) const {
             return i;
         }
     }
+    throw std::invalid_argument("Not found.");
     return -1;
 }
 

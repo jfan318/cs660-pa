@@ -38,7 +38,7 @@ const Field &Tuple::getField(int i) const {
 
 void Tuple::setField(int i, const Field *f) {
     // TODO pa1.1: implement
-    this->fields[i].reset((Field*) &f);
+    this->fields[i] = f;
 }
 
 Tuple::iterator Tuple::begin() const {
