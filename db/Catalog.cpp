@@ -7,6 +7,10 @@ using namespace db;
 void Catalog::addTable(DbFile *file, const std::string &name, const std::string &pkeyField) {
     // TODO pa1.2: implement
     Table table(file, name, pkeyField);
+    if (nameToTable.find(name) != nameToTable.end() || idToTable.find(file->getId()) != idToTable.end()) {
+        nameToTable.erase(name);
+        idToTable.erase(file->getId());
+    }
     nameToTable.emplace(name, table);
     idToTable.emplace(file->getId(), table);
 }
