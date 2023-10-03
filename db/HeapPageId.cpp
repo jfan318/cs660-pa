@@ -7,7 +7,7 @@ using namespace db;
 //
 
 // TODO pa1.4: implement
-HeapPageId::HeapPageId(int tableId, int pgNo) : tableId(tableId), pgNo(pgNo) {
+HeapPageId::HeapPageId(int tableId, int pgNo) {
     this->tableId = tableId;
     this->pgNo = pgNo;
 }
@@ -25,7 +25,7 @@ int HeapPageId::pageNumber() const {
 bool HeapPageId::operator==(const PageId &other) const {
     if (const auto *otherPageId = dynamic_cast<const HeapPageId *>(&other)) {
         // TODO pa1.4: implement
-        if (this->getTableId() == other.getTableId() && this.pageNumber() == other.pageNumber()){
+        if (this->getTableId() == other.getTableId() && this->pageNumber() == other.pageNumber()){
             return true;
         }
     }
