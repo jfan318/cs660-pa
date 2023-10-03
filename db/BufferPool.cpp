@@ -10,21 +10,22 @@ BufferPool::BufferPool(int numPages) {
 
 Page *BufferPool::getPage(const TransactionId &tid, PageId *pid) {
     // TODO pa1.3: implement
-    if (buffer.count(*pid)) {
-        return buffer[*pid];
+    for(const auto &page:this->buffer){
+        if(page->getId() == *pid){
+            return page;
+        }
     }
 
     // Fetch the page
     DbFile *file = Database::getCatalog().getDatabaseFile(pid->getTableId());
-    Page *page = file->readPage(*pid);
+    Page *newPage = file->readPage(*pid);
     if (buffer.size() >= numPages) {
         evictPage();
     }
-
     // Insert the fetched page into the buffer
-    buffer[*pid] = page;
+    buffer.emplace_back(newPage);
 
-    return page;
+    return newPage;
 }
 
 void BufferPool::evictPage() {

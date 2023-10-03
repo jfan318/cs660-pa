@@ -33,6 +33,7 @@ namespace db {
         uint8_t *header;
         Tuple *tuples;
         int numSlots;
+        std::unique_ptr<Page> page;
 
         /**
          * Suck up tuples from the source file.
@@ -119,7 +120,7 @@ namespace db {
      * @return an iterator over all tuples on this page
      * (note that this iterator shouldn't return tuples in empty slots!)
      */
-    class HeapPageIterator {
+    class HeapPageIterator : public std::__1::__fs::filesystem::directory_iterator {
         int slot;
         const HeapPage *page;
     public:

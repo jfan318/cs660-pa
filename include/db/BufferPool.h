@@ -30,7 +30,7 @@ namespace db {
         int pageSize = PAGE_SIZE;
         // TODO pa1.3: add private members
         int numPages;
-        std::unordered_map<PageId, Page*> buffer;
+        std::vector<Page*> buffer;;
 
     public:
         BufferPool(const BufferPool &) = delete;

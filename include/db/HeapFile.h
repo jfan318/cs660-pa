@@ -7,12 +7,20 @@
 #include <db/PageId.h>
 #include <db/TransactionId.h>
 #include <db/HeapPage.h>
+#include <db/HeapPageId.h>
+#pragma once
 
 namespace db {
+
     class HeapFileIterator {
         // TODO pa1.5: add private members
+        size_t index;
+        size_t size;
+        const std::vector<Tuple> &fields;
+
     public:
-        HeapFileIterator(/* TODO pa1.5: add parameters */);
+        HeapFileIterator(/* TODO pa1.5: add parameters */size_t i, size_t s, const std::vector<Tuple> &fields);
+
         bool operator!=(const HeapFileIterator &other) const;
 
         Tuple &operator*() const;
@@ -32,6 +40,14 @@ namespace db {
      */
     class HeapFile : public DbFile {
         // TODO pa1.5: add private members
+        friend class HeapFileIterator;
+        int id;
+        const char *fname;
+        std::fstream file;
+        db::TupleDesc td;
+        std::vector <HeapPage*> pages;
+
+
     public:
 
         /**
@@ -62,7 +78,7 @@ namespace db {
         /**
          * Returns the number of pages in this HeapFile.
          */
-        int getNumPages();
+        int getNumPages() const;
 
         HeapFileIterator begin() const;
 
