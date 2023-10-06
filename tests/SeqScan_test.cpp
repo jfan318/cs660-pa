@@ -5,7 +5,6 @@
 #include <db/TupleDesc.h>
 #include <db/DbFile.h>
 #include <db/SkeletonFile.h>
-#include "db/HeapFile.h"
 #include "db/SeqScan.h"
 
 TEST(SeqScanTest, IterateFile) {

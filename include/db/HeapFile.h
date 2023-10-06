@@ -8,7 +8,6 @@
 #include <db/TransactionId.h>
 #include <db/HeapPage.h>
 #include <db/HeapPageId.h>
-#pragma once
 
 namespace db {
 
