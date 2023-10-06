@@ -15,6 +15,7 @@
 #include <mutex>
 #include <optional>
 #include <cstring>
+#include <memory>
 
 namespace db {
     class HeapPageIterator;
@@ -120,7 +121,7 @@ namespace db {
      * @return an iterator over all tuples on this page
      * (note that this iterator shouldn't return tuples in empty slots!)
      */
-    class HeapPageIterator : public std::__1::__fs::filesystem::directory_iterator {
+    class HeapPageIterator {
         int slot;
         const HeapPage *page;
     public:
