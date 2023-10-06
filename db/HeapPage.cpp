@@ -1,4 +1,5 @@
 #include <db/HeapPage.h>
+#include <cmath>
 
 using namespace db;
 
@@ -46,7 +47,7 @@ HeapPage::HeapPage(const HeapPageId &id, uint8_t *data) : pid(id) {
 
 int HeapPage::getNumTuples() {
     // TODO pa1.4: implement
-    return std::floor((Database::getBufferPool().getPageSize()*8) / (td.getSize()*8 + 1));
+    return floor((Database::getBufferPool().getPageSize()*8) / (td.getSize()*8 + 1));
 }
 
 int HeapPage::getHeaderSize() {
