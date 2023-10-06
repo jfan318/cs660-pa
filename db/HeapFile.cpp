@@ -1,4 +1,3 @@
-#include <db/HeapFile.h>
 #include <db/TupleDesc.h>
 #include <db/Page.h>
 #include <db/PageId.h>
