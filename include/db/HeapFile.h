@@ -45,7 +45,6 @@ namespace db {
         db::TupleDesc td;
         std::vector <HeapPage*> pages;
 
-
     public:
 
         /**
