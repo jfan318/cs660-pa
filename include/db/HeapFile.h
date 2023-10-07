@@ -1,3 +1,6 @@
+#ifndef DB_HEAPFILE_H
+#define DB_HEAPFILE_H
+
 #include <iostream>
 #include <fstream>
 #include <vector>
@@ -82,3 +85,5 @@ namespace db {
         HeapFileIterator end() const;
     };
 }
+
+#endif
