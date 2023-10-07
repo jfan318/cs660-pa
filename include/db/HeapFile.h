@@ -39,7 +39,6 @@ namespace db {
      */
     class HeapFile : public DbFile {
         // TODO pa1.5: add private members
-        friend class HeapFileIterator;
         int id;
         const char *fname;
         std::fstream file;
