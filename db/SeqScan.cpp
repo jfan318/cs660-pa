@@ -62,7 +62,7 @@ SeqScan::iterator SeqScan::end() const {
     if(!page) {
         throw std::runtime_error("Invalid page or type mismatch.");
     }
-    return SeqScanIterator(page, true);  // true implies end iterator
+    return SeqScanIterator(page, true);
 }
 
 //
