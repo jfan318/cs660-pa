@@ -3,21 +3,22 @@
 using namespace db;
 
 // TODO pa2.2: implement
-Predicate::Predicate(int field, Op op, const Field *operand) {}
+Predicate::Predicate(int field, Op op, const Field *operand)
+    : field(field), op(op), operand(operand) {}
 
 int Predicate::getField() const {
     // TODO pa2.2: implement
-    return {};
+    return this->field;
 }
 
 Op Predicate::getOp() const {
     // TODO pa2.2: implement
-    return {};
+    return this->op;
 }
 
 const Field *Predicate::getOperand() const {
     // TODO pa2.2: implement
-    return {};
+    return this->operand;
 }
 
 bool Predicate::filter(const Tuple &t) const {
