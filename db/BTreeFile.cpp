@@ -5,13 +5,13 @@ using namespace db;
 BTreeLeafPage *BTreeFile::findLeafPage(TransactionId tid, PagesMap &dirtypages, BTreePageId *pid, Permissions perm,
                                        const Field *f) {
     // TODO pa2.2: implement
-    BTreePage *page = dynamic_cast<BTreePage *>(this->getPage(tid, dirtypages, pid, perm));
 
     if (pid->getType() == BTreePageType::LEAF) {
+        BTreePage *page = dynamic_cast<BTreePage *>(this->getPage(tid, dirtypages, pid, perm));
         return dynamic_cast<BTreeLeafPage *>(page);
     }
 
-    BTreeInternalPage* internalPage = dynamic_cast<BTreeInternalPage*>(page);
+    BTreeInternalPage* internalPage = dynamic_cast<BTreeInternalPage *>(this->getPage(tid, dirtypages, pid, perm));
     BTreeEntry* lastEntry = nullptr;
 
     for (BTreeEntry& entry : *internalPage) {
@@ -33,10 +33,10 @@ BTreeLeafPage *BTreeFile::splitLeafPage(TransactionId tid, PagesMap &dirtypages,
 
     auto it = page->rbegin();
     int count = 0;
-    Tuple* tuple = nullptr;
+    Tuple *tuple = nullptr;
 
-    for (int i=0; i < splitIdx && it != page->rend(); ++i, ++it) {
-        *tuple = *it;
+    for (int i=0; i < splitIdx-1 && it != page->rend(); i++, ++it) {
+        tuple = &(*it);
         page->deleteTuple(tuple);
         rightPage->insertTuple(tuple);
         count++;
