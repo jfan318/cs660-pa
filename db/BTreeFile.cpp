@@ -16,7 +16,7 @@ BTreeLeafPage *BTreeFile::findLeafPage(TransactionId tid, PagesMap &dirtypages, 
 
     for (BTreeEntry& entry : *internalPage) {
         lastEntry = &entry;
-        if (f->compare(Op::LESS_THAN_OR_EQ, entry.getKey())) {
+        if (!f || f->compare(Op::LESS_THAN_OR_EQ, entry.getKey())) {
             return this->findLeafPage(tid, dirtypages, entry.getLeftChild(), Permissions::READ_ONLY, f);
         }
     }
@@ -60,7 +60,8 @@ BTreeLeafPage *BTreeFile::splitLeafPage(TransactionId tid, PagesMap &dirtypages,
     page->setRightSiblingId(const_cast<BTreePageId *>(&rightPage->getId()));
     rightPage->setLeftSiblingId(const_cast<BTreePageId *>(&page->getId()));
 
-    if (field->compare(Op::LESS_THAN_OR_EQ, upKey)) return page;
+    if (field->compare(Op::LESS_THAN_OR_EQ, upKey))
+        return page;
     return rightPage;
 }
 
