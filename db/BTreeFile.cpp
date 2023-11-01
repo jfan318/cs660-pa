@@ -1,27 +1,25 @@
 #include <db/BTreeFile.h>
+#include <db/Database.h>
 
 using namespace db;
 
 BTreeLeafPage *BTreeFile::findLeafPage(TransactionId tid, PagesMap &dirtypages, BTreePageId *pid, Permissions perm,
                                        const Field *f) {
-    // TODO pa2.2: implement
+    // Fetch the page from buffer pool
 
     if (pid->getType() == BTreePageType::LEAF) {
-        BTreePage *page = dynamic_cast<BTreePage *>(this->getPage(tid, dirtypages, pid, perm));
+        BTreePage *page = dynamic_cast<BTreePage *>(this->getPage(tid,dirtypages,pid,perm));
         return dynamic_cast<BTreeLeafPage *>(page);
     }
-
-    BTreeInternalPage *internalPage = dynamic_cast<BTreeInternalPage *>(this->getPage(tid, dirtypages, pid, perm));
-    BTreeEntry *lastEntry = nullptr;
-
-    for (BTreeEntry entry : *internalPage) {
-        lastEntry = &entry;
+    BTreeInternalPage *inPage = dynamic_cast<BTreeInternalPage *>(this->getPage(tid,dirtypages,pid,perm));
+    BTreeEntry *bEntry= nullptr;
+    for (BTreeEntry entry: *inPage) { // assuming BTreeInternalPage has begin and end iterators
+        bEntry = &entry;
         if (!f || f->compare(Op::LESS_THAN_OR_EQ, entry.getKey())) {
             return this->findLeafPage(tid, dirtypages, entry.getLeftChild(), Permissions::READ_ONLY, f);
         }
     }
-
-    return this->findLeafPage(tid, dirtypages, lastEntry->getRightChild(), Permissions::READ_ONLY, f);
+    return this->findLeafPage(tid, dirtypages, bEntry->getRightChild(), Permissions::READ_ONLY, f);
 }
 
 BTreeLeafPage *BTreeFile::splitLeafPage(TransactionId tid, PagesMap &dirtypages, BTreeLeafPage *page, const Field *field) {
