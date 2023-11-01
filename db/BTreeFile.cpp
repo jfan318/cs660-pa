@@ -66,16 +66,16 @@ BTreeLeafPage *BTreeFile::splitLeafPage(TransactionId tid, PagesMap &dirtypages,
 BTreeInternalPage *BTreeFile::splitInternalPage(TransactionId tid, PagesMap &dirtypages, BTreeInternalPage *page,
                                                 Field *field) {
     // TODO pa2.3: implement
-    BTreeInternalPage* rightPage = dynamic_cast<BTreeInternalPage*>(this->getEmptyPage(tid, dirtypages, BTreePageType::INTERNAL));
+    BTreeInternalPage* rightPage = dynamic_cast<BTreeInternalPage *>(this->getEmptyPage(tid, dirtypages, BTreePageType::INTERNAL));
     int pageNum = page->getNumEntries();
-    int splitIdx = pageNum / 2;
-    if (pageNum % 2 == 0)
-        splitIdx += 1;
+    int splitIndex = pageNum / 2;
+    if (pageNum % 2 == 1)
+        splitIndex += 1;
 
     auto it = page->rbegin();
     BTreeEntry* entry = nullptr;
 
-    for (int i=0; i < splitIdx-1 && it != page->rend(); i++, ++it) {
+    for (int i=0; i < splitIndex-1 && it != page->rend(); i++, ++it) {
         *entry = *it;
         page->deleteKeyAndRightChild(entry);
         rightPage->insertEntry(*entry);
@@ -86,7 +86,7 @@ BTreeInternalPage *BTreeFile::splitInternalPage(TransactionId tid, PagesMap &dir
 
     BTreeInternalPage* parentPage = dynamic_cast<BTreeInternalPage*>(this->getParentWithEmptySlots(tid, dirtypages, page->getParentId(), upEntry.getKey()));
 
-    parentPage->insertEntry(upEntry);
+    parentPage->insertEntry(*new BTreeEntry(upEntry.getKey(),const_cast<BTreePageId *>(&page->getId()), const_cast<BTreePageId *>(&rightPage->getId())));
     rightPage->setParentId(const_cast<BTreePageId *>(&parentPage->getId()));
 
     this->updateParentPointers(tid, dirtypages, page);
