@@ -57,29 +57,11 @@ void BufferPool::flushPages(const TransactionId &tid) {
 void BufferPool::insertTuple(const TransactionId &tid, int tableId, Tuple *t) {
     // TODO pa2.3: implement
     DbFile *file = Database::getCatalog().getDatabaseFile(tableId);
-
-    if (!file) {
-        throw std::runtime_error("Not found");
-    }
-
-    // Insert the tuple into the table
     file->insertTuple(tid, *t);
-
-    // Add the page containing the tuple to the bufferpool
-    Page *page = getPage(t->getRecordId()->getPageId());
-    page->markDirty(tid);
 }
 
 void BufferPool::deleteTuple(const TransactionId &tid, Tuple *t) {
     // TODO pa2.3: implement
     DbFile *file = Database::getCatalog().getDatabaseFile(t->getRecordId()->getPageId()->getTableId());
-
-    if (!file) {
-        throw std::runtime_error("Not found");
-    }
-
     file->deleteTuple(tid, *t);
-
-    Page *page = getPage(t->getRecordId()->getPageId());
-    page->markDirty(tid);
 }

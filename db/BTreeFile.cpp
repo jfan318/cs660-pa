@@ -45,25 +45,18 @@ BTreeLeafPage *BTreeFile::splitLeafPage(TransactionId tid, PagesMap &dirtypages,
     Field* upKey = const_cast<Field*>(&temp_field);
     BTreeInternalPage* parentPage = dynamic_cast<BTreeInternalPage*>(
             this->getParentWithEmptySlots(tid, dirtypages, page->getParentId(), upKey));
-    BTreePageId pageId = page->getId();
-    BTreePageId rightPageId = rightPage->getId();
-    parentPage->insertEntry(*new BTreeEntry(upKey, &pageId, &rightPageId));
+    parentPage->insertEntry(*new BTreeEntry(upKey, const_cast<BTreePageId *>(&page->getId()), const_cast<BTreePageId *>(&rightPage->getId())));
     rightPage->setParentId(&parentPage->getId());
 
     if (page->getRightSiblingId() != nullptr) {
-        BTreeLeafPage* rightSibling = dynamic_cast<BTreeLeafPage *>(
+        BTreeLeafPage* rightSibling = dynamic_cast<BTreeLeafPage*>(
                 this->getPage(tid, dirtypages, page->getRightSiblingId(), Permissions::READ_WRITE));
-
-        BTreePageId rightpageId = rightPage->getId();
-        BTreePageId rightSibPageId = rightSibling->getId();
-        rightSibling->setLeftSiblingId(&rightPageId);
-        rightPage->setRightSiblingId(&rightSibPageId);
+        rightSibling->setLeftSiblingId(const_cast<BTreePageId *>(&rightPage->getId()));
+        rightPage->setRightSiblingId((BTreePageId *) &rightSibling->getId());
     }
 
-    BTreePageId rightSibId = rightPage->getId();
-    BTreePageId leftSibId = page->getId();
-    page->setRightSiblingId(&rightSibId);
-    rightPage->setLeftSiblingId(&leftSibId);
+    page->setRightSiblingId(const_cast<BTreePageId *>(&rightPage->getId()));
+    rightPage->setLeftSiblingId(const_cast<BTreePageId *>(&page->getId()));
 
     if (field->compare(Op::LESS_THAN_OR_EQ, upKey))
         return page;
