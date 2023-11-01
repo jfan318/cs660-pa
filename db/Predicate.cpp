@@ -29,5 +29,5 @@ bool Predicate::filter(const Tuple &t) const {
         return false;
     }
 
-    return Field->compare(op,operand);
+    return filterField->compare(op,operand);
 }
