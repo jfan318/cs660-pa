@@ -39,7 +39,7 @@ BTreeLeafPage *BTreeFile::splitLeafPage(TransactionId tid, PagesMap &dirtypages,
     auto it = page->rbegin();
     Tuple *tuple = nullptr;
 
-    for (int i=1; i < splitIndex && it != page->rend(); i++, ++it) {
+    for (int i=0; i < splitIndex-1 && it != page->rend(); i++, ++it) {
         tuple = &(*it);
         page->deleteTuple(tuple);
         rightPage->insertTuple(tuple);
@@ -80,7 +80,7 @@ BTreeInternalPage *BTreeFile::splitInternalPage(TransactionId tid, PagesMap &dir
     auto it = page->rbegin();
     BTreeEntry* entry = nullptr;
 
-    for (int i=1; i < splitIndex && it != page->rend(); i++, ++it) {
+    for (int i=0; i < splitIndex-1 && it != page->rend(); i++, ++it) {
         *entry = *it;
         page->deleteKeyAndRightChild(entry);
         rightPage->insertEntry(*entry);
