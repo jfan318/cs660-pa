@@ -25,6 +25,8 @@ bool IndexPredicate::operator==(const IndexPredicate &other) const {
 
 std::size_t std::hash<IndexPredicate>::operator()(const IndexPredicate &ipd) const {
     // TODO pa2.2: implement
-    std::hash<const Field *> ptr_hash;
-    return std::hash<int>{}(static_cast<int>(ipd.getOp())) ^ ptr_hash(ipd.getField());
+    std::hash<const Field *> predicateHash;
+    std::size_t h1 = std::hash<int>{}(static_cast<int>(ipd.getOp()));
+    std::size_t h2 = predicateHash(ipd.getField());
+    return h1 ^ h2;
 }

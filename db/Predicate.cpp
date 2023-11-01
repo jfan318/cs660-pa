@@ -24,10 +24,8 @@ const Field *Predicate::getOperand() const {
 bool Predicate::filter(const Tuple &t) const {
     // TODO pa2.2: implement
     const Field* filterField = &(t.getField(field));
-
     if (!filterField) {
         return false;
     }
-
     return filterField->compare(op,operand);
 }
