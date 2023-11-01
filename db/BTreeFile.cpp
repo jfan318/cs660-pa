@@ -11,10 +11,10 @@ BTreeLeafPage *BTreeFile::findLeafPage(TransactionId tid, PagesMap &dirtypages, 
         return dynamic_cast<BTreeLeafPage *>(page);
     }
 
-    BTreeInternalPage* internalPage = dynamic_cast<BTreeInternalPage *>(this->getPage(tid, dirtypages, pid, perm));
-    BTreeEntry* lastEntry = nullptr;
+    BTreeInternalPage *internalPage = dynamic_cast<BTreeInternalPage *>(this->getPage(tid, dirtypages, pid, perm));
+    BTreeEntry *lastEntry = nullptr;
 
-    for (BTreeEntry& entry : *internalPage) {
+    for (BTreeEntry entry : *internalPage) {
         lastEntry = &entry;
         if (!f || f->compare(Op::LESS_THAN_OR_EQ, entry.getKey())) {
             return this->findLeafPage(tid, dirtypages, entry.getLeftChild(), Permissions::READ_ONLY, f);
@@ -26,20 +26,19 @@ BTreeLeafPage *BTreeFile::findLeafPage(TransactionId tid, PagesMap &dirtypages, 
 
 BTreeLeafPage *BTreeFile::splitLeafPage(TransactionId tid, PagesMap &dirtypages, BTreeLeafPage *page, const Field *field) {
     // TODO pa2.3: implement
-    BTreeLeafPage* rightPage = dynamic_cast<BTreeLeafPage*>(this->getEmptyPage(tid, dirtypages, BTreePageType::LEAF));
+    BTreeLeafPage* rightPage = dynamic_cast<BTreeLeafPage *>(this->getEmptyPage(tid, dirtypages, BTreePageType::LEAF));
     int pageNum = page->getNumTuples();
-    int splitIdx = pageNum / 2;
+    int splitIndex = pageNum / 2;
     if (pageNum % 2 == 1)
-        splitIdx += 1;
+        splitIndex += 1;
 
     auto it = page->rbegin();
     Tuple *tuple = nullptr;
 
-    for (int i=0; i < splitIdx-1 && it != page->rend(); i++, ++it) {
+    for (int i=0; i < splitIndex-1 && it != page->rend(); i++, ++it) {
         tuple = &(*it);
         page->deleteTuple(tuple);
         rightPage->insertTuple(tuple);
-        i++;
     }
 
     const Field& temp_field = (tuple->getField(this->keyField));
