@@ -69,17 +69,16 @@ BTreeInternalPage *BTreeFile::splitInternalPage(TransactionId tid, PagesMap &dir
     BTreeInternalPage* rightPage = dynamic_cast<BTreeInternalPage*>(this->getEmptyPage(tid, dirtypages, BTreePageType::INTERNAL));
     int pageNum = page->getNumEntries();
     int splitIdx = pageNum / 2;
-    if (pageNum % 2 == 0) splitIdx -= 1;
+    if (pageNum % 2 == 0)
+        splitIdx += 1;
 
     auto it = page->rbegin();
     BTreeEntry* entry = nullptr;
 
-    int count = 0;
-    for (int i=0; i < splitIdx && it != page->rend(); ++i, ++it) {
+    for (int i=0; i < splitIdx-1 && it != page->rend(); i++, ++it) {
         *entry = *it;
         page->deleteKeyAndRightChild(entry);
         rightPage->insertEntry(*entry);
-        count++;
     }
 
     auto upEntry =  *(++it);
