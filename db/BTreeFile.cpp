@@ -29,17 +29,17 @@ BTreeLeafPage *BTreeFile::splitLeafPage(TransactionId tid, PagesMap &dirtypages,
     BTreeLeafPage* rightPage = dynamic_cast<BTreeLeafPage*>(this->getEmptyPage(tid, dirtypages, BTreePageType::LEAF));
     int pageNum = page->getNumTuples();
     int splitIdx = pageNum / 2;
-    if (pageNum % 2 == 1) splitIdx += 1;
+    if (pageNum % 2 == 1)
+        splitIdx += 1;
 
     auto it = page->rbegin();
-    int count = 0;
     Tuple *tuple = nullptr;
 
     for (int i=0; i < splitIdx-1 && it != page->rend(); i++, ++it) {
         tuple = &(*it);
         page->deleteTuple(tuple);
         rightPage->insertTuple(tuple);
-        count++;
+        i++;
     }
 
     const Field& temp_field = (tuple->getField(this->keyField));
