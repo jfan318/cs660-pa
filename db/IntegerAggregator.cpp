@@ -80,8 +80,8 @@ IntegerAggregator::IntegerAggregator(int gbfield, std::optional<Types::Type> gbf
 
 int IntegerAggregator::initialData() {
     switch (m_op) {
-        case Op::MIN: return INT_MAX;
-        case Op::MAX: return INT_MIN;
+        case Op::MIN: return 9999;
+        case Op::MAX: return -9999;
         case Op::SUM:
         case Op::COUNT:
         case Op::AVG: return 0;
