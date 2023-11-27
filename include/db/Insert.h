@@ -11,6 +11,14 @@ namespace db {
  */
     class Insert : public Operator {
         // TODO pa3.3: add private members
+        TransactionId t;
+        int tableId;
+        TupleDesc td;
+        DbIterator *child;
+        std::vector<DbIterator *> children;
+
+        bool isUsed;
+
     protected:
         /**
          * Inserts tuples read from child into the tableId specified by the
