@@ -11,6 +11,16 @@ namespace db {
  */
     class IntegerAggregator : public Aggregator {
         // TODO pa3.2: add private members
+        enum class flag {
+            MIN, MAX, SUM, AVG, COUNT
+        };
+
+        int m_groupByFieldIndex;
+        std::optional<Types::Type> m_groupByFieldType;
+        int m_aggregateFieldIndex;
+
+        int initialData();
+
     public:
         /**
          * Aggregate constructor
@@ -47,6 +57,10 @@ namespace db {
          *         the constructor.
          */
         DbIterator *iterator() const override;
+
+        std::unordered_map<Field*, int> m_aggregateData;
+        Aggregator::Op m_op;
+        std::unordered_map<Field*, int> m_count;
     };
 }
 
