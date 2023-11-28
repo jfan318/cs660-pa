@@ -5,21 +5,34 @@
 #include <optional>
 
 namespace db {
+    class IntAggregationHelper {
+    private:
+        int sum;
+        int minVal;
+        int maxVal;
+        int numOfElements;
+        std::vector<int> elements;
 
-/**
+    public:
+        IntAggregationHelper();
+        int getMinimum() const;
+        int getMaximum() const;
+        int getSum() const;
+        int getCount() const;
+        void addElement(int value);
+    };
+
+
+    /**
  * Knows how to compute some aggregate over a set of IntFields.
  */
     class IntegerAggregator : public Aggregator {
         // TODO pa3.2: add private members
-        enum class flag {
-            MIN, MAX, SUM, AVG, COUNT
-        };
-
-        int m_groupByFieldIndex;
-        std::optional<Types::Type> m_groupByFieldType;
-        int m_aggregateFieldIndex;
-
-        int initialData();
+        int groupByField;
+        int aggregateField;
+        std::optional<Types::Type> groupByFieldType;
+        Op operation;
+        std::unordered_map<int, IntAggregationHelper> aggregationMap;
 
     public:
         /**
@@ -61,6 +74,8 @@ namespace db {
         std::unordered_map<Field*, int> m_aggregateData;
         Aggregator::Op m_op;
         std::unordered_map<Field*, int> m_count;
+
+        TupleDesc createTupleDesc() const;
     };
 }
 

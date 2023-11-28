@@ -3,130 +3,133 @@
 
 using namespace db;
 
+IntAggregationHelper::IntAggregationHelper() : sum(0), minVal(0), maxVal(0), numOfElements(0) {}
+
+int IntAggregationHelper::getMinimum() const { return minVal; }
+int IntAggregationHelper::getMaximum() const { return maxVal; }
+int IntAggregationHelper::getSum() const { return sum; }
+int IntAggregationHelper::getCount() const { return numOfElements; }
+
+void IntAggregationHelper::addElement(int value) {
+    elements.push_back(value);
+    sum += value;
+    minVal = std::min(minVal, value);
+    maxVal = std::max(maxVal, value);
+    numOfElements++;
+}
+
 class IntegerAggregatorIterator : public DbIterator {
     // TODO pa3.2: some code goes here
-    int m_groupByFieldIndex;
-    TupleDesc m_tupleDesc;
-    const IntegerAggregator &m_aggregator;
-    std::unordered_map<Field*, int>::const_iterator m_current;
+    int groupByField;
+    std::unordered_map<int, IntAggregationHelper> aggregationData;
+    std::unordered_map<int, IntAggregationHelper>::iterator iter;
+    TupleDesc tupleDescription;
+    Aggregator::Op operation;
 
 public:
-    IntegerAggregatorIterator(int gbfield,
-                              const TupleDesc &td,
-                              const IntegerAggregator &aggregator) :
-                              m_groupByFieldIndex(gbfield), m_tupleDesc(td), m_aggregator(aggregator) {
+    IntegerAggregatorIterator(int gbField, const std::unordered_map<int, IntAggregationHelper> &data, Aggregator::Op op) :
+                              groupByField(gbField), aggregationData(data), operation(op), tupleDescription(*new TupleDesc({Types::INT_TYPE})){
         // TODO pa3.2: some code goes here
     }
 
     void open() override {
         // TODO pa3.2: some code goes here
-        m_current = m_aggregator.m_aggregateData.begin();
+        iter = aggregationData.begin();
     }
 
     bool hasNext() override {
         // TODO pa3.2: some code goes here
-        return m_current != m_aggregator.m_aggregateData.end();
+        return iter != aggregationData.end();
     }
 
     Tuple next() override {
         // TODO pa3.2: some code goes here
-        if (!hasNext()) {
-            throw std::runtime_error("No more elements");
+        auto current = *iter;
+        IntAggregationHelper& aggData = current.second;
+        int resultValue;
+        switch (operation) {
+            case Aggregator::Op::COUNT:
+                resultValue = aggData.getCount();
+                break;
+            case Aggregator::Op::MIN:
+                resultValue = aggData.getMinimum();
+                break;
+            case Aggregator::Op::MAX:
+                resultValue = aggData.getMaximum();
+                break;
+            case Aggregator::Op::AVG:
+                resultValue = aggData.getCount() > 0 ? aggData.getSum() / aggData.getCount() : 0;
+                break;
+            case Aggregator::Op::SUM:
+                resultValue = aggData.getSum();
+                break;
+            default: break;
         }
 
-        Tuple tuple(m_tupleDesc);
-        Field* groupField = m_current->first;
-        int aggregateVal = m_current->second;
-
-        db::IntegerAggregator::Op op = m_aggregator.m_op;  // Get the operation type from the aggregator
-        if (op == db::Aggregator::Op::AVG && m_aggregator.m_count.find(groupField) != m_aggregator.m_count.end()) {
-            aggregateVal /= m_aggregator.m_count.at(groupField);
-        }
-
-        if (m_groupByFieldIndex == Aggregator::NO_GROUPING) {
-            tuple.setField(0, new IntField(aggregateVal));
+        Tuple resultTuple = Tuple(tupleDescription);
+        if (groupByField == Aggregator::NO_GROUPING) {
+            IntField field = IntField(resultValue);
+            resultTuple.setField(0, &field);
         } else {
-            tuple.setField(0, groupField);
-            tuple.setField(1, new IntField(aggregateVal));
+            IntField groupField = IntField(current.first);
+            IntField resultField = IntField(resultValue);
+            resultTuple.setField(0, &groupField);
+            resultTuple.setField(1, &resultField);
         }
-
-        ++m_current;
-        return tuple;
+        ++iter;
+        return resultTuple;
     }
 
     void rewind() override {
         // TODO pa3.2: some code goes here
-        m_current = m_aggregator.m_aggregateData.begin();
+        close();
+        open();
     }
 
     const TupleDesc &getTupleDesc() const override {
         // TODO pa3.2: some code goes here
-        return m_tupleDesc;
+        return tupleDescription;
     }
 
     void close() override {
         // TODO pa3.2: some code goes here
-        m_current = m_aggregator.m_aggregateData.end();
+        aggregationData.clear();
+        iter = aggregationData.end();
     }
 };
 
 IntegerAggregator::IntegerAggregator(int gbfield, std::optional<Types::Type> gbfieldtype, int afield,
                                      Op what):
-        m_groupByFieldIndex(gbfield), m_groupByFieldType(gbfieldtype), m_aggregateFieldIndex(afield), m_op(what){
+        groupByField(gbfield), groupByFieldType(gbfieldtype), aggregateField(afield), operation(what) {
     // TODO pa3.2: some code goes here
-    m_aggregateData = std::unordered_map<Field*, int>();
-    m_count = std::unordered_map<Field*, int>();
-}
-
-int IntegerAggregator::initialData() {
-    switch (m_op) {
-        case Op::MIN: return 9999;
-        case Op::MAX: return -9999;
-        case Op::SUM:
-        case Op::COUNT:
-        case Op::AVG: return 0;
-        default: return 0;
-    }
 }
 
 void IntegerAggregator::mergeTupleIntoGroup(Tuple *tup) {
     // TODO pa3.2: some code goes here
-    IntField* tupleGroupByField;
-    if (m_groupByFieldIndex != NO_GROUPING) {
-        *tupleGroupByField = (IntField &&) tup->getField(m_groupByFieldIndex);
-    }
-    if (m_aggregateData.find(tupleGroupByField) == m_aggregateData.end()) {
-        m_aggregateData[tupleGroupByField] = initialData();
-        m_count[tupleGroupByField] = 0;
-    }
+    IntField aggField = (IntField&&)(tup->getField(this->aggregateField));
 
-    int tupleValue = tup->getField(m_aggregateFieldIndex).getType();
-    int currentValue = m_aggregateData[tupleGroupByField];
-    int currentCount = m_count[tupleGroupByField];
-    int newValue = currentValue;
+    int aggValue = aggField.getValue();
 
-    switch (m_op) {
-        case Op::MIN:
-            newValue = std::min(currentValue, tupleValue);
-            break;
-        case Op::MAX:
-            newValue = std::max(currentValue, tupleValue);
-            break;
-        case Op::SUM:
-        case Op::AVG:
-            m_count[tupleGroupByField] = currentCount + 1;
-            newValue = tupleValue + currentValue;
-            break;
-        case Op::COUNT:
-            newValue = currentValue + 1;
-            break;
-        default:
-            break; // should not reach here
+    // Determine the key for grouping
+    int groupKey;
+    if (this->groupByField == Aggregator::NO_GROUPING) {
+        groupKey = 0;
+    }
+    else {
+        IntField temp = (IntField &&) tup->getField(this->groupByField);
+        groupKey = temp.getValue();
     }
 
-    m_aggregateData[tupleGroupByField] = newValue;
+    // Initialize group data if not present
+    if (this->aggregationMap.find(groupKey) == this->aggregationMap.end()) {
+        this->aggregationMap[groupKey] = IntAggregationHelper();
+    }
+
+    // Update the aggregate data for the group
+    this->aggregationMap[groupKey].addElement(aggValue);
 }
 
 DbIterator *IntegerAggregator::iterator() const {
     // TODO pa3.2: some code goes here
+    return new IntegerAggregatorIterator(this->groupByField, this->aggregationMap, this->operation);
 }
