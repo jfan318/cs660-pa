@@ -67,16 +67,18 @@ public:
         }
 
         Tuple resultTuple = Tuple(tupleDescription);
+        IntField* field = new IntField(resultValue);
         if (groupByField == Aggregator::NO_GROUPING) {
-            IntField field = IntField(resultValue);
-            resultTuple.setField(0, &field);
+            resultTuple.setField(0, field);
         } else {
             IntField groupField = IntField(current.first);
             IntField resultField = IntField(resultValue);
             resultTuple.setField(0, &groupField);
             resultTuple.setField(1, &resultField);
         }
+
         ++iter;
+
         return resultTuple;
     }
 
@@ -110,7 +112,6 @@ void IntegerAggregator::mergeTupleIntoGroup(Tuple *tup) {
 
     int aggValue = aggField.getValue();
 
-    // Determine the key for grouping
     int groupKey;
     if (this->groupByField == Aggregator::NO_GROUPING) {
         groupKey = 0;
@@ -120,12 +121,10 @@ void IntegerAggregator::mergeTupleIntoGroup(Tuple *tup) {
         groupKey = temp.getValue();
     }
 
-    // Initialize group data if not present
     if (this->aggregationMap.find(groupKey) == this->aggregationMap.end()) {
         this->aggregationMap[groupKey] = IntAggregationHelper();
     }
 
-    // Update the aggregate data for the group
     this->aggregationMap[groupKey].addElement(aggValue);
 }
 

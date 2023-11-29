@@ -46,30 +46,30 @@ void HashEquiJoin::open() {
         throw std::runtime_error("Invalid Hashjoin Key type.");
     }
 
-    Tuple c1ReadTuple;
-    std::vector<Tuple> *the_list;
+    Tuple readTuple;
+    std::vector<Tuple> *list;
     while (child1->hasNext()) {
-        c1ReadTuple = child1->next();
-        IntField f = (IntField &&) c1ReadTuple.getField(p.getField1());
+        readTuple = child1->next();
+        IntField f = (IntField &&) readTuple.getField(p.getField1());
 
         if (keyType == Types::INT_TYPE) {
             IntField key = dynamic_cast<IntField&>(f);
             auto it = intMap.find(key.getValue());
             if (it != intMap.end()) {
-                the_list = &(it->second);
+                list = &(it->second);
             } else {
-                the_list = &(intMap[key.getValue()]);
+                list = &(intMap[key.getValue()]);
             }
-            the_list->push_back(c1ReadTuple);
+            list->push_back(readTuple);
         } else {
             StringField key = dynamic_cast<StringField&>(f);
             auto it = strMap.find(key.getValue());
             if (it != strMap.end()) {
-                the_list = &(it->second);
+                list = &(it->second);
             } else {
-                the_list = &(strMap[key.getValue()]);
+                list = &(strMap[key.getValue()]);
             }
-            the_list->push_back(c1ReadTuple);
+            list->push_back(readTuple);
         }
     }
     Operator::open();
