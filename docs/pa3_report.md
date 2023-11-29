@@ -28,8 +28,6 @@ makes me fail to write custom tests for this method.
 
 
 ## Challenges
-The assignment took me roughly 5-6 hours/day to complete.
-
 Completing this assignment took me approximately 5-6 hours per day. The assignment introduced
 new features and incorporated a wider variety of data types, which required additional learning and adaptation. A significant
 challenge was maintaining the consistency and accuracy of various related variables throughout the execution process. Additionally, 
