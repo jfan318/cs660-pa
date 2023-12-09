@@ -43,4 +43,27 @@ std::vector<LogicalJoinNode> JoinOptimizer::orderJoins(std::unordered_map<std::s
                                                        std::unordered_map<std::string, double> filterSelectivities) {
     // TODO pa4.3: some code goes here
 
+    PlanCache planCache;
+    std::unordered_set<LogicalJoinNode> hash(joins.begin(), joins.end());
+
+    for (size_t i = 1; i <= joins.size(); ++i) {
+        for (const auto& subset : enumerateSubsets(joins, i)) {
+            CostCard *best;
+            best->plan = {};
+            best->cost = std::numeric_limits<double>::max();
+            best->card = std::numeric_limits<int>::max();
+
+            for (const auto& node : subset) {
+                auto plan = computeCostAndCardOfSubplan(stats, filterSelectivities, node, subset, best->cost, planCache);
+                if (plan && plan->cost < best->cost) {
+                    best = plan;
+                }
+            }
+            planCache.addPlan(const_cast<std::unordered_set<LogicalJoinNode> &>(subset), best);
+        }
+    }
+
+    auto bestOrder = planCache.get(hash);
+
+    return reinterpret_cast<const std::vector<db::LogicalJoinNode> &>(bestOrder);
 }
