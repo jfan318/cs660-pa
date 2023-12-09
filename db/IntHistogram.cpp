@@ -1,4 +1,6 @@
 #include <db/IntHistogram.h>
+#include <vector>
+#include <cmath>
 
 using namespace db;
 
